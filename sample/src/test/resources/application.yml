@@ -1,0 +1,6 @@
+aws:
+  access-key-id:
+  secret-key:
+  region: ap-northeast-1
+#  s3:
+#    endpoint:
