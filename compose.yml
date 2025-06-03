@@ -16,7 +16,8 @@ services:
 #    depends_on:
 #      localstack:
 #        condition: service_healthy
-#    environment:
+    environment:
+      AWS_REGION: ap-northeast-1
 
   localstack:
 #    image: localstack/localstack:latest
