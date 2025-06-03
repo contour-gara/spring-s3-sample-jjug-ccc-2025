@@ -1,0 +1,33 @@
+services:
+  photo-diary-api:
+    build:
+      context: ./photo-diary-api
+      dockerfile: Dockerfile
+    networks:
+      - spring-s3-sample-jjug-ccc-2025
+    ports:
+      - 8080:8080
+    healthcheck:
+      test: "curl -f http://localhost:8080/actuator/health || exit 1"
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+#    depends_on:
+#      localstack:
+#        condition: service_healthy
+#    environment:
+
+  localstack:
+#    image: localstack/localstack:latest
+    image: localstack/localstack:s3-latest
+    networks:
+      - spring-s3-sample-jjug-ccc-2025
+    ports:
+      - 4566:4566
+#    environment:
+#      SERVICE: s3
+
+networks:
+  spring-s3-sample-jjug-ccc-2025:
+    driver: bridge
