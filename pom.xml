@@ -11,7 +11,7 @@
 
     <modules>
         <module>sample</module>
-        <module>photo-diary-api</module>
+        <module>photo-note-api</module>
     </modules>
 
 </project>

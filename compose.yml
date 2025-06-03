@@ -1,7 +1,7 @@
 services:
-  photo-diary-api:
+  photo-note-api:
     build:
-      context: ./photo-diary-api
+      context: ./photo-note-api
       dockerfile: Dockerfile
     networks:
       - spring-s3-sample-jjug-ccc-2025
