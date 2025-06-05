@@ -1,0 +1,75 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - 'main'
+  workflow_dispatch:
+
+jobs:
+  unit_test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'corretto'
+          java-version: '21'
+          cache: 'maven'
+
+      - name: Run unit test
+        working-directory: photo-note-api
+        run: ../mvnw clean test
+
+  build_and_upload_jar_file:
+    needs: unit_test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'corretto'
+          java-version: '21'
+          cache: 'maven'
+
+      - name: Build jar file
+        working-directory: photo-note-api
+        run: ../mvnw clean package -Dmaven.test.skip=true
+
+      - name: Upload Dockerfile and jar file
+        uses: actions/upload-artifact@v4
+        with:
+          name: jar-and-Dockerfile
+          path: |
+            photo-note-api/Dockerfile
+            photo-note-api/target/photo-note-api-1.0-SNAPSHOT.jar
+
+  integration_test:
+    needs: build_and_upload_jar_file
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'corretto'
+          java-version: '21'
+          cache: 'maven'
+
+      - name: Download Dockerfile and jar file
+        uses: actions/download-artifact@v4.3.0
+        with:
+          name: jar-and-Dockerfile
+          path: photo-note-api
+
+      - name: Run integration test
+        working-directory: integration-test
+        run: ../mvnw clean verify
