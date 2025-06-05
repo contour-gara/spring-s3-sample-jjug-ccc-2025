@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
+@CrossOrigin
 public class PhotoNoteController {
     private final FindAllPhotoNoteUseCase findAllPhotoNoteUseCase;
     private final SavePhotoUseCase savePhotoUseCase;
