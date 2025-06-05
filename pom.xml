@@ -12,6 +12,7 @@
     <modules>
         <module>sample</module>
         <module>photo-note-api</module>
+        <module>integration-test</module>
     </modules>
 
 </project>
