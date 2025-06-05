@@ -67,18 +67,25 @@ front/
 ├── public/
 │   └── index.html          # HTMLテンプレート
 ├── src/
-│   ├── App.js             # メインReactコンポーネント
-│   ├── index.js           # エントリーポイント
+│   ├── App.tsx            # メインReactコンポーネント（TypeScript）
+│   ├── index.tsx          # エントリーポイント（TypeScript）
+│   ├── types.ts           # 型定義
 │   └── index.css          # スタイルシート
+├── tsconfig.json          # TypeScript設定
 ├── Dockerfile             # Docker設定
 ├── .dockerignore          # Docker除外ファイル
 ├── package.json           # npm設定
 └── README.md              # このファイル
 ```
 
+# Photo Note Frontend
+
+Photo Note APIを使用するReact + TypeScriptフロントエンドアプリケーションです。
+
 ## 技術スタック
 
 - **React 18** - UIライブラリ
+- **TypeScript** - 型安全な開発
 - **Lucide React** - アイコンライブラリ
 - **Tailwind CSS** - CSSフレームワーク（CDN経由）
 - **Nginx** - プロダクション用Webサーバー

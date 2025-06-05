@@ -1,18 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { Camera, FileText, Plus, RefreshCw, AlertCircle, Upload, Image } from 'lucide-react';
+import { 
+  PhotoNote, 
+  FindAllPhotoNoteResponse, 
+  SavePhotoNoteResponse,
+  FileChangeEvent,
+  KeyPressEvent 
+} from './types';
 
-const PhotoNoteApp = () => {
-  const [photoNotes, setPhotoNotes] = useState([]);
-  const [newNote, setNewNote] = useState('');
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [error, setError] = useState('');
+const PhotoNoteApp: React.FC = () => {
+  const [photoNotes, setPhotoNotes] = useState<PhotoNote[]>([]);
+  const [newNote, setNewNote] = useState<string>('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [error, setError] = useState<string>('');
   // Docker環境用のAPI URL設定
-  const [apiUrl] = useState(process.env.REACT_APP_API_URL || 'http://localhost:8080');
+  const [apiUrl] = useState<string>(process.env.REACT_APP_API_URL || 'http://localhost:8080');
 
   // 写真ノート一覧を取得
-  const fetchPhotoNotes = async () => {
+  const fetchPhotoNotes = async (): Promise<void> => {
     setLoading(true);
     setError('');
     
@@ -21,10 +28,11 @@ const PhotoNoteApp = () => {
       if (!response.ok) {
         throw new Error(`HTTPエラー: ${response.status}`);
       }
-      const data = await response.json();
+      const data: FindAllPhotoNoteResponse = await response.json();
       setPhotoNotes(data.photoNotes || []);
     } catch (err) {
-      setError(`データの取得に失敗しました: ${err.message}`);
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      setError(`データの取得に失敗しました: ${errorMessage}`);
       console.error('取得エラー:', err);
     } finally {
       setLoading(false);
@@ -32,8 +40,8 @@ const PhotoNoteApp = () => {
   };
 
   // ファイル選択処理
-  const handleFileSelect = (e) => {
-    const file = e.target.files[0];
+  const handleFileSelect = (e: FileChangeEvent): void => {
+    const file = e.target.files?.[0];
     if (file) {
       // 画像ファイルのみ許可
       if (!file.type.startsWith('image/')) {
@@ -51,7 +59,7 @@ const PhotoNoteApp = () => {
   };
 
   // S3への写真アップロード
-  const uploadPhotoToS3 = async (presignedUrl, file) => {
+  const uploadPhotoToS3 = async (presignedUrl: string, file: File): Promise<boolean> => {
     setUploadProgress(0);
     
     try {
@@ -61,7 +69,6 @@ const PhotoNoteApp = () => {
         headers: {
           'Content-Type': file.type,
         },
-        // アップロード進捗の監視（XMLHttpRequestを使用）
       });
 
       if (!response.ok) {
@@ -77,7 +84,7 @@ const PhotoNoteApp = () => {
   };
 
   // 新しい写真ノートを作成（写真アップロード付き）
-  const createPhotoNoteWithPhoto = async () => {
+  const createPhotoNoteWithPhoto = async (): Promise<void> => {
     if (!newNote.trim()) {
       setError('メモを入力してください');
       return;
@@ -106,7 +113,7 @@ const PhotoNoteApp = () => {
         throw new Error(`APIエラー: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data: SavePhotoNoteResponse = await response.json();
       const presignedUrl = data.url;
 
       // 2. S3に写真をアップロード
@@ -120,7 +127,8 @@ const PhotoNoteApp = () => {
       await fetchPhotoNotes();
       
     } catch (err) {
-      setError(`作成に失敗しました: ${err.message}`);
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      setError(`作成に失敗しました: ${errorMessage}`);
       console.error('作成エラー:', err);
     } finally {
       setLoading(false);
@@ -134,11 +142,16 @@ const PhotoNoteApp = () => {
   }, []);
 
   // Enterキーで投稿
-  const handleKeyPress = (e) => {
+  const handleKeyPress = (e: KeyPressEvent): void => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       createPhotoNoteWithPhoto();
     }
+  };
+
+  // ファイル選択をクリア
+  const clearSelectedFile = (): void => {
+    setSelectedFile(null);
   };
 
   return (
@@ -214,9 +227,10 @@ const PhotoNoteApp = () => {
                   className="w-full h-48 object-cover rounded-lg"
                 />
                 <button
-                  onClick={() => setSelectedFile(null)}
+                  onClick={clearSelectedFile}
                   className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
                   disabled={loading}
+                  type="button"
                 >
                   ×
                 </button>
@@ -229,7 +243,7 @@ const PhotoNoteApp = () => {
               onKeyPress={handleKeyPress}
               placeholder="写真のメモを入力してください..."
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
-              rows="3"
+              rows={3}
               disabled={loading}
             />
 
@@ -254,6 +268,7 @@ const PhotoNoteApp = () => {
                 onClick={createPhotoNoteWithPhoto}
                 disabled={loading || !newNote.trim() || !selectedFile}
                 className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+                type="button"
               >
                 {loading ? (
                   <RefreshCw className="animate-spin" size={20} />
@@ -267,6 +282,7 @@ const PhotoNoteApp = () => {
                 onClick={fetchPhotoNotes}
                 disabled={loading}
                 className="bg-gray-500 hover:bg-gray-600 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2"
+                type="button"
               >
                 <RefreshCw className={loading ? 'animate-spin' : ''} size={20} />
                 更新
@@ -308,8 +324,12 @@ const PhotoNoteApp = () => {
                         alt={photoNote.note}
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                          e.target.style.display = 'none';
-                          e.target.nextSibling.style.display = 'flex';
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                          const nextSibling = target.nextElementSibling as HTMLElement;
+                          if (nextSibling) {
+                            nextSibling.style.display = 'flex';
+                          }
                         }}
                       />
                     ) : null}
