@@ -41,6 +41,7 @@ public class S3RepositoryImpl implements S3Repository {
                     .credentialsProvider(() -> AwsBasicCredentials.create(awsConfig.getAccessKeyId(), awsConfig.getSecretKey()))
                     .region(Region.of(awsConfig.getRegion()))
                     .endpointOverride(URI.create(awsConfig.getS3().getEndpoint()))
+                    .forcePathStyle(true)
                     .build();
         }
     }

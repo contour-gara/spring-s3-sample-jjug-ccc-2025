@@ -13,21 +13,31 @@ services:
       timeout: 5s
       retries: 3
       start_period: 30s
-#    depends_on:
-#      localstack:
-#        condition: service_healthy
+    depends_on:
+      localstack:
+        condition: service_healthy
     environment:
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_KEY: test123456
       AWS_REGION: ap-northeast-1
+      AWS_S3_ENDPOINT: http://localstack:4566/
 
   localstack:
-#    image: localstack/localstack:latest
     image: localstack/localstack:s3-latest
     networks:
       - spring-s3-sample-jjug-ccc-2025
     ports:
       - 4566:4566
-#    environment:
-#      SERVICE: s3
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:4566/_localstack/health" ]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    environment:
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test123456
+      DEBUG: 1
 
 networks:
   spring-s3-sample-jjug-ccc-2025:
