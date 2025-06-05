@@ -14,6 +14,8 @@ services:
       retries: 3
       start_period: 30s
     depends_on:
+      mysql:
+        condition: service_healthy
       localstack:
         condition: service_healthy
     environment:
@@ -21,6 +23,27 @@ services:
       AWS_SECRET_KEY: test123456
       AWS_REGION: ap-northeast-1
       AWS_S3_ENDPOINT: http://localstack:4566/
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/jjug
+      SPRING_DATASOURCE_USERNAME: gara
+      SPRING_DATASOURCE_PASSWORD: password
+
+  mysql:
+    image: mysql:latest
+    environment:
+      MYSQL_USER: gara
+      MYSQL_PASSWORD: password
+      MYSQL_DATABASE: jjug
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    networks:
+      - spring-s3-sample-jjug-ccc-2025
+    ports:
+      - '3306:3306'
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent" ]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
   localstack:
     image: localstack/localstack:s3-latest
@@ -33,7 +56,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 3
-      start_period: 15s
+      start_period: 30s
     environment:
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test123456
