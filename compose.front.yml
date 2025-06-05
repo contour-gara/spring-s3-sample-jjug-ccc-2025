@@ -15,7 +15,10 @@ services:
 
   photo-note-api:
     environment:
-      AWS_ACCESS_KEY_ID:
-      AWS_SECRET_KEY:
+      AWS_ACCESS_KEY_ID: ${JJUG_AWS_ACCESS_KEY_ID}
+      AWS_SECRET_KEY: ${JJUG_AWS_SECRET_KEY}
       AWS_REGION: ap-northeast-1
       AWS_S3_ENDPOINT:
+      SPRING_DATASOURCE_URL: jdbc:mysql://gateway01.ap-northeast-1.prod.aws.tidbcloud.com:4000/jjug?sslMode=VERIFY_IDENTITY
+      SPRING_DATASOURCE_USERNAME: ${TIDB_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${TIDB_PASSWORD}
