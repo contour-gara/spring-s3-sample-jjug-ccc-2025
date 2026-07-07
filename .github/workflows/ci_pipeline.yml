@@ -79,4 +79,6 @@ jobs:
 
       - name: Run integration test
         working-directory: integration-test
+        env:
+          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
         run: ../mvnw clean verify
