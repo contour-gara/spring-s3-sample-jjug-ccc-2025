@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Mise install
         uses: jdx/mise-action@v4
       - name: Run unit test
@@ -25,14 +25,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Mise install
         uses: jdx/mise-action@v4
       - name: Build jar file
         working-directory: photo-note-api
         run: mvn clean package -Dmaven.test.skip=true
       - name: Upload Dockerfile and jar file
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: jar-and-Dockerfile
           path: |
@@ -44,15 +44,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: setup docker-compose
-        uses: KengoTODA/actions-setup-docker-compose@v1.2.3
+        uses: KengoTODA/actions-setup-docker-compose@v1.2.4
         with:
           version: "2.33.1"
       - name: Mise install
         uses: jdx/mise-action@v4
       - name: Download Dockerfile and jar file
-        uses: actions/download-artifact@v4.3.0
+        uses: actions/download-artifact@v8
         with:
           name: jar-and-Dockerfile
           path: photo-note-api
