@@ -3,7 +3,7 @@ name: CI Pipeline
 on:
   push:
     branches:
-      - 'main'
+      - "main"
   workflow_dispatch:
 
 jobs:
@@ -16,12 +16,14 @@ jobs:
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'corretto'
-          java-version: '21'
-          cache: 'maven'
+          distribution: "corretto"
+          java-version: "21"
+          cache: "maven"
 
       - name: Run unit test
         working-directory: photo-note-api
+        env:
+          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
         run: ../mvnw clean test
 
   build_and_upload_jar_file:
@@ -34,9 +36,9 @@ jobs:
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'corretto'
-          java-version: '21'
-          cache: 'maven'
+          distribution: "corretto"
+          java-version: "21"
+          cache: "maven"
 
       - name: Build jar file
         working-directory: photo-note-api
@@ -60,14 +62,14 @@ jobs:
       - name: setup docker-compose
         uses: KengoTODA/actions-setup-docker-compose@v1.2.3
         with:
-          version: '2.33.1'
+          version: "2.33.1"
 
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'corretto'
-          java-version: '21'
-          cache: 'maven'
+          distribution: "corretto"
+          java-version: "21"
+          cache: "maven"
 
       - name: Download Dockerfile and jar file
         uses: actions/download-artifact@v4.3.0
