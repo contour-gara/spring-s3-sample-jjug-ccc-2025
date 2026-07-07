@@ -17,7 +17,7 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <spring-boot.version>3.4.5</spring-boot.version>
+        <spring-boot.version>3.4.13</spring-boot.version>
         <aws.version>2.31.54</aws.version>
         <java-uuid-generator.version>5.1.0</java-uuid-generator.version>
         <database-rider.version>1.44.0</database-rider.version>

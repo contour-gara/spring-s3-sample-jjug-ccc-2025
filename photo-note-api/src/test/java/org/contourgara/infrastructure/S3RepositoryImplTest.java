@@ -28,7 +28,7 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 @Testcontainers
 class S3RepositoryImplTest {
     @Container
-    static LocalStackContainer localStackContainer = new LocalStackContainer(DockerImageName.parse("localstack/localstack:s3-latest"));
+    static LocalStackContainer localStackContainer = new LocalStackContainer(DockerImageName.parse("localstack/localstack-pro:latest")).withEnv("LOCALSTACK_AUTH_TOKEN", System.getenv("LOCALSTACK_AUTH_TOKEN"));
 
     @Autowired
     S3Repository sut;
