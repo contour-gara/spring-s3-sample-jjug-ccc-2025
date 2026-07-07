@@ -12,19 +12,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: "corretto"
-          java-version: "21"
-          cache: "maven"
-
+      - name: Mise install
+        uses: jdx/mise-action@v4
       - name: Run unit test
         working-directory: photo-note-api
         env:
           LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
-        run: ../mvnw clean test
+        run: mvn clean test
 
   build_and_upload_jar_file:
     needs: unit_test
@@ -32,18 +26,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: "corretto"
-          java-version: "21"
-          cache: "maven"
-
+      - name: Mise install
+        uses: jdx/mise-action@v4
       - name: Build jar file
         working-directory: photo-note-api
-        run: ../mvnw clean package -Dmaven.test.skip=true
-
+        run: mvn clean package -Dmaven.test.skip=true
       - name: Upload Dockerfile and jar file
         uses: actions/upload-artifact@v4
         with:
@@ -58,27 +45,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: setup docker-compose
         uses: KengoTODA/actions-setup-docker-compose@v1.2.3
         with:
           version: "2.33.1"
-
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: "corretto"
-          java-version: "21"
-          cache: "maven"
-
+      - name: Mise install
+        uses: jdx/mise-action@v4
       - name: Download Dockerfile and jar file
         uses: actions/download-artifact@v4.3.0
         with:
           name: jar-and-Dockerfile
           path: photo-note-api
-
       - name: Run integration test
         working-directory: integration-test
         env:
           LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
-        run: ../mvnw clean verify
+        run: mvn clean verify
