@@ -78,9 +78,9 @@ class PhotoNoteIT {
                 .statusCode(200)
                 .header("Content-Type", "application/json")
                 .body("photoNotes[0].note", equalTo("test1"))
-                .body("photoNotes[0].url", startsWith("http://localhost.localstack.cloud:4566/jjug-ccc-2025/"))
+                .body("photoNotes[0].url", startsWith("http://jjug-ccc-2025.s3.localhost.localstack.cloud:4566/"))
                 .body("photoNotes[1].note", equalTo("test2"))
-                .body("photoNotes[1].url", startsWith("http://localhost.localstack.cloud:4566/jjug-ccc-2025/"));
+                .body("photoNotes[1].url", startsWith("http://jjug-ccc-2025.s3.localhost.localstack.cloud:4566/"));
     }
 
     @Test
@@ -103,6 +103,6 @@ class PhotoNoteIT {
                 .then()
                 .statusCode(201)
                 .header("Content-Type", "application/json")
-                .body("url", startsWith("http://localhost.localstack.cloud:4566/jjug-ccc-2025/"));
+                .body("url", startsWith("http://jjug-ccc-2025.s3.localhost.localstack.cloud:4566/"));
     }
 }

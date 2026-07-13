@@ -10,7 +10,6 @@ import org.springframework.stereotype.Repository;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.S3Configuration;
 import software.amazon.awssdk.services.s3.model.Bucket;
 import software.amazon.awssdk.services.s3.model.S3Object;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -36,14 +35,12 @@ public class S3RepositoryImpl implements S3Repository {
                     .credentialsProvider(() -> AwsBasicCredentials.create(awsConfig.getAccessKeyId(), awsConfig.getSecretKey()))
                     .region(Region.of(awsConfig.getRegion()))
                     .endpointOverride(URI.create(awsConfig.getS3().getEndpoint()))
-                    .serviceConfiguration(S3Configuration.builder().pathStyleAccessEnabled(true).build())
                     .build();
 
             s3Client = S3Client.builder()
                     .credentialsProvider(() -> AwsBasicCredentials.create(awsConfig.getAccessKeyId(), awsConfig.getSecretKey()))
                     .region(Region.of(awsConfig.getRegion()))
                     .endpointOverride(URI.create(awsConfig.getS3().getEndpoint()))
-                    .forcePathStyle(true)
                     .build();
         }
     }
