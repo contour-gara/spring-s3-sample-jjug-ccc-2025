@@ -36,7 +36,7 @@ class S3RepositoryImplTest {
     S3Client s3Client = S3Client.builder()
             .credentialsProvider(() -> AwsBasicCredentials.create(localStackContainer.getAccessKey(), localStackContainer.getSecretKey()))
             .region(Region.of(localStackContainer.getRegion()))
-            .endpointOverride(URI.create(localStackContainer.getEndpoint().toString()))
+            .endpointOverride(URI.create("http://s3.localhost.localstack.cloud:" + localStackContainer.getMappedPort(4566)))
             .build();
 
     @DynamicPropertySource
@@ -44,7 +44,7 @@ class S3RepositoryImplTest {
         registry.add("aws.access-key-id", () -> localStackContainer.getAccessKey());
         registry.add("aws.secret-key", () -> localStackContainer.getSecretKey());
         registry.add("aws.region", () -> localStackContainer.getRegion());
-        registry.add("aws.s3.endpoint", () -> localStackContainer.getEndpoint());
+        registry.add("aws.s3.endpoint", () -> "http://s3.localhost.localstack.cloud:" + localStackContainer.getMappedPort(4566));
     }
 
     @BeforeEach
