@@ -9,11 +9,15 @@ on:
 jobs:
   unit_test:
     runs-on: ubuntu-latest
+    env:
+      MISE_AGE_STRICT: "false"
     steps:
       - name: Checkout
         uses: actions/checkout@v7
       - name: Mise install
         uses: jdx/mise-action@v4
+        with:
+          experimental: true
       - name: Run unit test
         working-directory: photo-note-api
         env:
@@ -23,11 +27,15 @@ jobs:
   build_and_upload_jar_file:
     needs: unit_test
     runs-on: ubuntu-latest
+    env:
+      MISE_AGE_STRICT: "false"
     steps:
       - name: Checkout
         uses: actions/checkout@v7
       - name: Mise install
         uses: jdx/mise-action@v4
+        with:
+          experimental: true
       - name: Build jar file
         working-directory: photo-note-api
         run: mvn clean package -Dmaven.test.skip=true
@@ -42,6 +50,8 @@ jobs:
   integration_test:
     needs: build_and_upload_jar_file
     runs-on: ubuntu-latest
+    env:
+      MISE_AGE_STRICT: "false"
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -51,6 +61,8 @@ jobs:
           version: "2.33.1"
       - name: Mise install
         uses: jdx/mise-action@v4
+        with:
+          experimental: true
       - name: Download Dockerfile and jar file
         uses: actions/download-artifact@v8
         with:
