@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.localstack.LocalStackContainer;
+import org.testcontainers.containers.MinIOContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
@@ -22,24 +22,28 @@ import software.amazon.awssdk.services.s3.model.*;
 @SpringBootTest
 @Testcontainers
 class S3RepositoryTest {
+    static final String REGION = "ap-northeast-1";
+
     @Container
-    static LocalStackContainer localStackContainer = new LocalStackContainer(DockerImageName.parse("localstack/localstack:s3-latest"));
+    static MinIOContainer minIOContainer = new MinIOContainer(DockerImageName.parse("minio/minio:latest"))
+            .withEnv("MINIO_DOMAIN", "s3.localhost")
+            .withEnv("MINIO_REGION", REGION);
 
     @Autowired
     S3Repository sut;
 
     S3Client s3Client = S3Client.builder()
-            .credentialsProvider(() -> AwsBasicCredentials.create(localStackContainer.getAccessKey(), localStackContainer.getSecretKey()))
-            .region(Region.of(localStackContainer.getRegion()))
-            .endpointOverride(URI.create(localStackContainer.getEndpoint().toString()))
+            .credentialsProvider(() -> AwsBasicCredentials.create(minIOContainer.getUserName(), minIOContainer.getPassword()))
+            .region(Region.of(REGION))
+            .endpointOverride(URI.create("http://s3.localhost:" + minIOContainer.getMappedPort(9000)))
             .build();
 
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {
-        registry.add("aws.access-key-id", () -> localStackContainer.getAccessKey());
-        registry.add("aws.secret-key", () -> localStackContainer.getSecretKey());
-        registry.add("aws.region", () -> localStackContainer.getRegion());
-        registry.add("aws.s3.endpoint", () -> localStackContainer.getEndpoint());
+        registry.add("aws.access-key-id", () -> minIOContainer.getUserName());
+        registry.add("aws.secret-key", () -> minIOContainer.getPassword());
+        registry.add("aws.region", () -> REGION);
+        registry.add("aws.s3.endpoint", () -> "http://s3.localhost:" + minIOContainer.getMappedPort(9000));
     }
 
     @BeforeEach

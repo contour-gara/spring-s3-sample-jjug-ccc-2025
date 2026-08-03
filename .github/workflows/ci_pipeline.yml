@@ -20,8 +20,6 @@ jobs:
           experimental: true
       - name: Run unit test
         working-directory: photo-note-api
-        env:
-          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
         run: mvn clean test
 
   build_and_upload_jar_file:
@@ -70,6 +68,4 @@ jobs:
           path: photo-note-api
       - name: Run integration test
         working-directory: integration-test
-        env:
-          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
         run: mvn clean verify

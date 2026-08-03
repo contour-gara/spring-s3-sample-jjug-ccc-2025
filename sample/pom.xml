@@ -18,7 +18,7 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <spring-boot.version>3.4.5</spring-boot.version>
+        <spring-boot.version>3.4.13</spring-boot.version>
         <aws.version>2.31.54</aws.version>
 
         <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
@@ -88,7 +88,7 @@
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>localstack</artifactId>
+            <artifactId>minio</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
