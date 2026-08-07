@@ -15,9 +15,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.core.checksums.RequestChecksumCalculation;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3Configuration;
 import software.amazon.awssdk.services.s3.model.Bucket;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
@@ -35,8 +37,8 @@ class PhotoNoteIT {
                     DB_PASSWORD
             );
 
-    private static final String AWS_ACCESS_KEY_ID = "test";
-    private static final String AWS_SECRET_KEY = "testtest";
+    private static final String AWS_ACCESS_KEY_ID = "testtest";
+    private static final String AWS_SECRET_KEY = "testtesttesttest";
     private static final String AWS_REGION = "ap-northeast-1";
     private static final String AWS_S3_ENDPOINT = "http://localhost:9000/";
 
@@ -44,7 +46,8 @@ class PhotoNoteIT {
             .credentialsProvider(() -> AwsBasicCredentials.create(AWS_ACCESS_KEY_ID, AWS_SECRET_KEY))
             .region(Region.of(AWS_REGION))
             .endpointOverride(URI.create(AWS_S3_ENDPOINT))
-            .forcePathStyle(true)
+            .serviceConfiguration(S3Configuration.builder().pathStyleAccessEnabled(true).chunkedEncodingEnabled(false).build())
+            .requestChecksumCalculation(RequestChecksumCalculation.WHEN_REQUIRED)
             .build();
 
     @BeforeAll

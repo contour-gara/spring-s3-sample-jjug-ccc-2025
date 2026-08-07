@@ -14,13 +14,13 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-      minio:
+      garage:
         condition: service_healthy
-      minio-init:
+      garage-init:
         condition: service_completed_successfully
     environment:
-      AWS_ACCESS_KEY_ID: test
-      AWS_SECRET_KEY: testtest
+      AWS_ACCESS_KEY_ID: testtest
+      AWS_SECRET_KEY: testtesttesttest
       AWS_REGION: ap-northeast-1
       AWS_S3_ENDPOINT: http://s3.localhost:9000/
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/jjug
@@ -55,9 +55,8 @@ services:
       retries: 3
       start_period: 30s
 
-  minio:
-    image: minio/minio:latest
-    command: server /data --console-address ":9001"
+  garage:
+    image: dxflrs/garage:v2.3.0
     networks:
       default:
         aliases:
@@ -65,27 +64,36 @@ services:
           - jjug-ccc-2025.s3.localhost
     ports:
       - 9000:9000
-      - 9001:9001
+      - 3903:3903
+    volumes:
+      - ./garage/garage.toml:/etc/garage.toml:ro
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      test: ["CMD", "/garage", "status"]
       interval: 5s
       timeout: 5s
       retries: 3
       start_period: 30s
-    environment:
-      MINIO_ROOT_USER: test
-      MINIO_ROOT_PASSWORD: testtest
-      MINIO_REGION: ap-northeast-1
-      MINIO_DOMAIN: s3.localhost
-      MINIO_API_CORS_ALLOW_ORIGIN: http://localhost:3000
 
-  minio-init:
-    image: minio/mc:latest
+  garage-init:
+    image: curlimages/curl:latest
     depends_on:
-      minio:
+      garage:
         condition: service_healthy
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
-        mc alias set local http://minio:9000 test testtest
-        mc mb --ignore-existing local/jjug-ccc-2025
+        set -eu
+        ADMIN=http://garage:3903
+        AUTH="Authorization: Bearer garage-local-admin-token"
+        until curl -s -o /dev/null "$$ADMIN/health"; do sleep 1; done
+        STATUS=$$(curl -sf -H "$$AUTH" "$$ADMIN/v2/GetClusterStatus")
+        LAYOUT_VERSION=$$(echo "$$STATUS" | grep -o '"layoutVersion": *[0-9]*' | grep -o '[0-9]*')
+        if [ "$$LAYOUT_VERSION" = "0" ]; then
+          NODE_ID=$$(echo "$$STATUS" | grep -o '"id": *"[0-9a-f]*"' | head -n 1 | cut -d '"' -f 4)
+          curl -sf -H "$$AUTH" -X POST "$$ADMIN/v2/UpdateClusterLayout" -d "{\"roles\": [{\"id\": \"$$NODE_ID\", \"zone\": \"dc1\", \"capacity\": 1000000000, \"tags\": []}]}" > /dev/null
+          curl -sf -H "$$AUTH" -X POST "$$ADMIN/v2/ApplyClusterLayout" -d '{"version": 1}' > /dev/null
+        fi
+        curl -sf -H "$$AUTH" -X POST "$$ADMIN/v2/ImportKey" -d '{"accessKeyId": "testtest", "secretAccessKey": "testtesttesttest", "name": "local"}' > /dev/null || true
+        curl -sf -H "$$AUTH" -X POST "$$ADMIN/v2/UpdateKey?id=testtest" -d '{"allow": {"createBucket": true}}' > /dev/null
+        curl -sf --aws-sigv4 "aws:amz:ap-northeast-1:s3" --user "testtest:testtesttesttest" -X PUT "http://garage:9000/jjug-ccc-2025" > /dev/null || true
+        curl -sf --aws-sigv4 "aws:amz:ap-northeast-1:s3" --user "testtest:testtesttesttest" -X PUT "http://garage:9000/jjug-ccc-2025?cors" --data-binary '<CORSConfiguration><CORSRule><AllowedOrigin>http://localhost:3000</AllowedOrigin><AllowedMethod>GET</AllowedMethod><AllowedMethod>PUT</AllowedMethod><AllowedHeader>*</AllowedHeader></CORSRule></CORSConfiguration>' > /dev/null
