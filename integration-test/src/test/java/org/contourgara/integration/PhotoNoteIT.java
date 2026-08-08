@@ -19,7 +19,6 @@ import software.amazon.awssdk.core.checksums.RequestChecksumCalculation;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.S3Configuration;
 import software.amazon.awssdk.services.s3.model.Bucket;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
@@ -40,13 +39,12 @@ class PhotoNoteIT {
     private static final String AWS_ACCESS_KEY_ID = "testtest";
     private static final String AWS_SECRET_KEY = "testtesttesttest";
     private static final String AWS_REGION = "ap-northeast-1";
-    private static final String AWS_S3_ENDPOINT = "http://localhost:3900/";
+    private static final String AWS_S3_ENDPOINT = "http://s3.localhost:3900/";
 
     S3Client s3Client = S3Client.builder()
             .credentialsProvider(() -> AwsBasicCredentials.create(AWS_ACCESS_KEY_ID, AWS_SECRET_KEY))
             .region(Region.of(AWS_REGION))
             .endpointOverride(URI.create(AWS_S3_ENDPOINT))
-            .serviceConfiguration(S3Configuration.builder().pathStyleAccessEnabled(true).chunkedEncodingEnabled(false).build())
             .requestChecksumCalculation(RequestChecksumCalculation.WHEN_REQUIRED)
             .build();
 

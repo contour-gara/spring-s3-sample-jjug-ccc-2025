@@ -18,7 +18,6 @@ import software.amazon.awssdk.core.checksums.RequestChecksumCalculation;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.S3Configuration;
 import software.amazon.awssdk.services.s3.model.*;
 
 @SpringBootTest
@@ -43,7 +42,6 @@ class S3RepositoryTest {
             .credentialsProvider(() -> AwsBasicCredentials.create(ACCESS_KEY_ID, SECRET_KEY))
             .region(Region.of(REGION))
             .endpointOverride(URI.create("http://s3.localhost:" + garageContainer.getMappedPort(3900)))
-            .serviceConfiguration(S3Configuration.builder().chunkedEncodingEnabled(false).build())
             .requestChecksumCalculation(RequestChecksumCalculation.WHEN_REQUIRED)
             .build();
 
