@@ -40,7 +40,7 @@ class PhotoNoteIT {
     private static final String AWS_ACCESS_KEY_ID = "testtest";
     private static final String AWS_SECRET_KEY = "testtesttesttest";
     private static final String AWS_REGION = "ap-northeast-1";
-    private static final String AWS_S3_ENDPOINT = "http://localhost:9000/";
+    private static final String AWS_S3_ENDPOINT = "http://localhost:3900/";
 
     S3Client s3Client = S3Client.builder()
             .credentialsProvider(() -> AwsBasicCredentials.create(AWS_ACCESS_KEY_ID, AWS_SECRET_KEY))
@@ -81,9 +81,9 @@ class PhotoNoteIT {
                 .statusCode(200)
                 .header("Content-Type", "application/json")
                 .body("photoNotes[0].note", equalTo("test1"))
-                .body("photoNotes[0].url", startsWith("http://jjug-ccc-2025.s3.localhost:9000/"))
+                .body("photoNotes[0].url", startsWith("http://jjug-ccc-2025.s3.localhost:3900/"))
                 .body("photoNotes[1].note", equalTo("test2"))
-                .body("photoNotes[1].url", startsWith("http://jjug-ccc-2025.s3.localhost:9000/"));
+                .body("photoNotes[1].url", startsWith("http://jjug-ccc-2025.s3.localhost:3900/"));
     }
 
     @Test
@@ -106,6 +106,6 @@ class PhotoNoteIT {
                 .then()
                 .statusCode(201)
                 .header("Content-Type", "application/json")
-                .body("url", startsWith("http://jjug-ccc-2025.s3.localhost:9000/"));
+                .body("url", startsWith("http://jjug-ccc-2025.s3.localhost:3900/"));
     }
 }
