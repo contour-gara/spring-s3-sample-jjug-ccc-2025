@@ -16,10 +16,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.http.SdkHttpConfigurationOption;
+import software.amazon.awssdk.http.apache.ApacheHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.Bucket;
 import software.amazon.awssdk.services.s3.model.S3Object;
+import software.amazon.awssdk.utils.AttributeMap;
 
 @DBUnit(caseInsensitiveStrategy = Orthography.LOWERCASE)
 @DBRider
@@ -36,15 +39,18 @@ class PhotoNoteIT {
             );
 
     private static final String AWS_ACCESS_KEY_ID = "test";
-    private static final String AWS_SECRET_KEY = "test123456";
+    private static final String AWS_SECRET_KEY = "test";
     private static final String AWS_REGION = "ap-northeast-1";
-    private static final String AWS_S3_ENDPOINT = "http://localhost:4566/";
+    private static final String AWS_S3_ENDPOINT = "https://127.0.0.1:9297/";
 
     S3Client s3Client = S3Client.builder()
             .credentialsProvider(() -> AwsBasicCredentials.create(AWS_ACCESS_KEY_ID, AWS_SECRET_KEY))
             .region(Region.of(AWS_REGION))
             .endpointOverride(URI.create(AWS_S3_ENDPOINT))
-            .forcePathStyle(true)
+            // ホストからボリューム内の自己署名証明書を読めないため、検証を無効化する。
+            // テスト準備専用のクライアントに限定して、証明書検証の処理を省く。
+            .httpClient(ApacheHttpClient.builder().buildWithDefaults(
+                    AttributeMap.builder().put(SdkHttpConfigurationOption.TRUST_ALL_CERTIFICATES, true).build()))
             .build();
 
     @BeforeAll
@@ -78,9 +84,9 @@ class PhotoNoteIT {
                 .statusCode(200)
                 .header("Content-Type", "application/json")
                 .body("photoNotes[0].note", equalTo("test1"))
-                .body("photoNotes[0].url", startsWith("http://jjug-ccc-2025.s3.localhost.localstack.cloud:4566/"))
+                .body("photoNotes[0].url", startsWith("https://127.0.0.1:9297/jjug-ccc-2025/"))
                 .body("photoNotes[1].note", equalTo("test2"))
-                .body("photoNotes[1].url", startsWith("http://jjug-ccc-2025.s3.localhost.localstack.cloud:4566/"));
+                .body("photoNotes[1].url", startsWith("https://127.0.0.1:9297/jjug-ccc-2025/"));
     }
 
     @Test
@@ -103,6 +109,6 @@ class PhotoNoteIT {
                 .then()
                 .statusCode(201)
                 .header("Content-Type", "application/json")
-                .body("url", startsWith("http://jjug-ccc-2025.s3.localhost.localstack.cloud:4566/"));
+                .body("url", startsWith("https://127.0.0.1:9297/jjug-ccc-2025/"));
     }
 }

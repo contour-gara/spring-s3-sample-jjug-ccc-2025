@@ -3,8 +3,10 @@ services:
     build:
       context: ./photo-note-api
       dockerfile: Dockerfile
-    ports:
-      - 8080:8080
+    # 証明書の対象ホストとパス形式強制の要件を満たすため、127.0.0.1 接続を共有ネットワークで実現する。
+    # API から 127.0.0.1 でアクセスでき、署名付き URL もホスト側からそのまま利用できる。
+    # 8080 番ポートの公開や名前解決は、ネットワークを共有する aws-emulator 側で一括設定する。
+    network_mode: service:aws-emulator
     healthcheck:
       test: "curl -f http://localhost:8080/actuator/health || exit 1"
       interval: 5s
@@ -14,13 +16,18 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-      localstack:
+      aws-emulator:
         condition: service_healthy
+    volumes:
+      - aws-emulator:/aws-emulator:ro
     environment:
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_KEY: test
       AWS_REGION: ap-northeast-1
-      AWS_S3_ENDPOINT: http://s3.localhost.localstack.cloud:4566/
+      AWS_S3_ENDPOINT: https://127.0.0.1:9297/
+      # HTTPS のみ対応で起動ごとに自己署名証明書が作られるため、ボリューム経由で信頼させる。
+      # 証明書を含めたトラストストアをコンテナに渡し、JAVA_TOOL_OPTIONS で指定する。
+      JAVA_TOOL_OPTIONS: -Djavax.net.ssl.trustStore=/aws-emulator/9297/truststore.p12 -Djavax.net.ssl.trustStoreType=PKCS12
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/jjug
       SPRING_DATASOURCE_USERNAME: gara
       SPRING_DATASOURCE_PASSWORD: password
@@ -53,24 +60,37 @@ services:
       retries: 3
       start_period: 30s
 
-  localstack:
-    image: localstack/localstack-pro:latest
+  aws-emulator:
+    # AWS Emulator の公式イメージがなく Dockerfile を置かずに済ませるため、dockerfile_inline で定義する。
+    # ビルド時に RPM を導入してキャッシュを残し、毎回の再ダウンロードを防ぐ。
+    # LTS の最新版を取り込むには、キャッシュを無効化して再ビルドする。
+    # uname -m でアーキテクチャごとの RPM を切り替える。
+    build:
+      context: ./aws-emulator
+      dockerfile_inline: |
+        FROM public.ecr.aws/amazonlinux/amazonlinux:2023-minimal
+        RUN curl -fsSL -o /tmp/aws-emulator.rpm "https://downloads.aws.com/aws-emulator/packages/aws-emulator/LTS/latest/aws-emulator-$$(uname -m).rpm" \
+            && rpm -i /tmp/aws-emulator.rpm \
+            && rm /tmp/aws-emulator.rpm
+    command: ["sh", "/aws-emulator/start.sh", "jjug-ccc-2025"]
     networks:
       default:
         aliases:
-          - s3.localhost.localstack.cloud
-          - jjug-ccc-2025.s3.localhost.localstack.cloud
+          - photo-note-api
     ports:
-      - 4566:4566
+      - 127.0.0.1:9297:9297
+      - 8080:8080
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      test: ["CMD", "test", "-f", "/tmp/ready"]
       interval: 5s
       timeout: 5s
       retries: 3
       start_period: 30s
     volumes:
-      - ./init_s3.sh:/etc/localstack/init/ready.d/init_s3.sh
+      - ./aws-emulator/start.sh:/aws-emulator/start.sh:ro
+      - aws-emulator:/root/.aws/emulator
     environment:
-      DEBUG: 1
-      S3_SKIP_SIGNATURE_VALIDATION: 0
-      LOCALSTACK_AUTH_TOKEN: ${LOCALSTACK_AUTH_TOKEN}
+      AWS_REGION: ap-northeast-1
+
+volumes:
+  aws-emulator:
