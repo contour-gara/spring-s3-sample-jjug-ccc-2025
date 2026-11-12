@@ -19,6 +19,7 @@
 
         <spring-boot.version>3.4.13</spring-boot.version>
         <aws.version>2.31.54</aws.version>
+        <testcontainers-floci.version>1.16.0</testcontainers-floci.version>
         <java-uuid-generator.version>5.1.0</java-uuid-generator.version>
         <database-rider.version>1.44.0</database-rider.version>
         <rest-assured.version>5.5.5</rest-assured.version>
@@ -113,8 +114,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>localstack</artifactId>
+            <groupId>io.floci</groupId>
+            <artifactId>testcontainers-floci</artifactId>
+            <version>${testcontainers-floci.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

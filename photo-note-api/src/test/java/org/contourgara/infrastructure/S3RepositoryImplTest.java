@@ -2,6 +2,7 @@ package org.contourgara.infrastructure;
 
 import static org.assertj.core.api.Assertions.*;
 
+import io.floci.testcontainers.FlociContainer;
 import java.net.URI;
 import org.contourgara.domain.S3Repository;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,10 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
@@ -28,23 +27,23 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 @Testcontainers
 class S3RepositoryImplTest {
     @Container
-    static LocalStackContainer localStackContainer = new LocalStackContainer(DockerImageName.parse("localstack/localstack-pro:latest")).withEnv("LOCALSTACK_AUTH_TOKEN", System.getenv("LOCALSTACK_AUTH_TOKEN"));
+    static FlociContainer flociContainer = new FlociContainer();
 
     @Autowired
     S3Repository sut;
 
     S3Client s3Client = S3Client.builder()
-            .credentialsProvider(() -> AwsBasicCredentials.create(localStackContainer.getAccessKey(), localStackContainer.getSecretKey()))
-            .region(Region.of(localStackContainer.getRegion()))
-            .endpointOverride(URI.create("http://s3.localhost.localstack.cloud:" + localStackContainer.getMappedPort(4566)))
+            .credentialsProvider(() -> AwsBasicCredentials.create(flociContainer.getAccessKey(), flociContainer.getSecretKey()))
+            .region(Region.of(flociContainer.getRegion()))
+            .endpointOverride(URI.create("http://s3.localhost.floci.io:" + flociContainer.getMappedPort(FlociContainer.PORT)))
             .build();
 
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {
-        registry.add("aws.access-key-id", () -> localStackContainer.getAccessKey());
-        registry.add("aws.secret-key", () -> localStackContainer.getSecretKey());
-        registry.add("aws.region", () -> localStackContainer.getRegion());
-        registry.add("aws.s3.endpoint", () -> "http://s3.localhost.localstack.cloud:" + localStackContainer.getMappedPort(4566));
+        registry.add("aws.access-key-id", () -> flociContainer.getAccessKey());
+        registry.add("aws.secret-key", () -> flociContainer.getSecretKey());
+        registry.add("aws.region", () -> flociContainer.getRegion());
+        registry.add("aws.s3.endpoint", () -> "http://s3.localhost.floci.io:" + flociContainer.getMappedPort(FlociContainer.PORT));
     }
 
     @BeforeEach

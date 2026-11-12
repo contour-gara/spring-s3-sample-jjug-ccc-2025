@@ -2,6 +2,7 @@ package org.contourgara;
 
 import static org.assertj.core.api.Assertions.*;
 
+import io.floci.testcontainers.FlociContainer;
 import java.net.URI;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,10 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
@@ -23,23 +22,23 @@ import software.amazon.awssdk.services.s3.model.*;
 @Testcontainers
 class S3RepositoryTest {
     @Container
-    static LocalStackContainer localStackContainer = new LocalStackContainer(DockerImageName.parse("localstack/localstack:s3-latest"));
+    static FlociContainer flociContainer = new FlociContainer();
 
     @Autowired
     S3Repository sut;
 
     S3Client s3Client = S3Client.builder()
-            .credentialsProvider(() -> AwsBasicCredentials.create(localStackContainer.getAccessKey(), localStackContainer.getSecretKey()))
-            .region(Region.of(localStackContainer.getRegion()))
-            .endpointOverride(URI.create(localStackContainer.getEndpoint().toString()))
+            .credentialsProvider(() -> AwsBasicCredentials.create(flociContainer.getAccessKey(), flociContainer.getSecretKey()))
+            .region(Region.of(flociContainer.getRegion()))
+            .endpointOverride(URI.create(flociContainer.getEndpoint()))
             .build();
 
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {
-        registry.add("aws.access-key-id", () -> localStackContainer.getAccessKey());
-        registry.add("aws.secret-key", () -> localStackContainer.getSecretKey());
-        registry.add("aws.region", () -> localStackContainer.getRegion());
-        registry.add("aws.s3.endpoint", () -> localStackContainer.getEndpoint());
+        registry.add("aws.access-key-id", () -> flociContainer.getAccessKey());
+        registry.add("aws.secret-key", () -> flociContainer.getSecretKey());
+        registry.add("aws.region", () -> flociContainer.getRegion());
+        registry.add("aws.s3.endpoint", () -> flociContainer.getEndpoint());
     }
 
     @BeforeEach

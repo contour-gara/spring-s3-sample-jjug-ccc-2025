@@ -18,8 +18,9 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <spring-boot.version>3.4.5</spring-boot.version>
+        <spring-boot.version>3.4.13</spring-boot.version>
         <aws.version>2.31.54</aws.version>
+        <testcontainers-floci.version>1.16.0</testcontainers-floci.version>
 
         <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
     </properties>
@@ -87,8 +88,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>localstack</artifactId>
+            <groupId>io.floci</groupId>
+            <artifactId>testcontainers-floci</artifactId>
+            <version>${testcontainers-floci.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
